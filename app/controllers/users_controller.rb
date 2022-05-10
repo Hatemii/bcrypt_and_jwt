@@ -1,8 +1,6 @@
 class UsersController < ApplicationController
-  # before_action :authenticate_user! 
-
   def index
-    users = User.all.order("created_at desc")
+    users = User.all.order('created_at desc')
     render json: users
   end
 
@@ -14,12 +12,13 @@ class UsersController < ApplicationController
   def create
     user = User.create!(user_params)
     if user.valid?
-      token = JWT.encode({user_id: user.id, exp: 10.minutes.from_now.to_i}, 'secret', 'HS256')
+      token = JWT.encode({ user_id: user.id, exp: 10.minutes.from_now.to_i }, 'secret', 'HS256')
+      session[:user_id] = user.id
 
       render json: {
-        user: user, 
+        user: user,
         token: token,
-        message:"created successfully"
+        message: 'created successfully'
       }
     else
       render json: { errors: user.errors.full_messages }
@@ -39,7 +38,7 @@ class UsersController < ApplicationController
 
   private
 
-    def user_params
-      params.permit(:email, :password, :password_confirmation)
-    end
+  def user_params
+    params.permit(:email, :password, :password_confirmation)
+  end
 end
